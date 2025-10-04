@@ -1,0 +1,72 @@
+/* Modern Global App Styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #fafafa;
+  min-height: 100vh;
+  height: 100%;
+  overflow: hidden;
+}
+
+.App {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Focus styles - Remove default browser outline */
+* {
+  outline: none !important;
+}
+
+*:focus {
+  outline: none !important;
+}
+
+/* Custom focus styles for accessibility */
+button:focus-visible {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+textarea:focus-visible,
+input:focus-visible {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Selection styles */
+::selection {
+  background: #3b82f6;
+  color: white;
+}

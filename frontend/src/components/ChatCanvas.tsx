@@ -112,56 +112,6 @@ const ChatCanvas: React.FC = () => {
     return timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Enhanced markdown parser for better formatting
-  const renderMarkdown = (text: string): JSX.Element => {
-    const lines = text.split('\n');
-    const elements: JSX.Element[] = [];
-
-    lines.forEach((line, index) => {
-      let processedLine = line.trim();
-      
-      // Handle different header levels
-      if (processedLine.startsWith('### ')) {
-        elements.push(
-          <h4 key={index} className={styles.messageSubheader}>
-            {processedLine.substring(4)}
-          </h4>
-        );
-        return;
-      } else if (processedLine.startsWith('## ')) {
-        elements.push(
-          <h3 key={index} className={styles.messageMainHeader}>
-            {processedLine.substring(3)}
-          </h3>
-        );
-        return;
-      } else if (processedLine.startsWith('# ')) {
-        elements.push(
-          <h2 key={index} className={styles.messageTitleHeader}>
-            {processedLine.substring(2)}
-          </h2>
-        );
-        return;
-      }
-      
-      // Handle bold (**text**)
-      processedLine = processedLine.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      
-      // Handle italic (*text*)
-      processedLine = processedLine.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
-      
-      // Handle line breaks and empty lines
-      if (processedLine === '') {
-        elements.push(<div key={index} className={styles.lineBreak} />);
-      } else {
-        elements.push(
-          <p key={index} className={styles.markdownParagraph} dangerouslySetInnerHTML={{ __html: processedLine }} />
-        );
-      }
-    });
-
-    return <div className={styles.markdownContent}>{elements}</div>;
-  };
 
   return (
     <div className={styles.chatContainer}>
@@ -220,7 +170,7 @@ const ChatCanvas: React.FC = () => {
                     </div>
                     <div className={styles.messageBody}>
                       <div className={styles.messageText}>
-                        {message.type === 'ai' ? renderMarkdown(message.content) : message.content}
+                        {message.content}
                       </div>
                       <div className={styles.messageTime}>
                         {formatTimestamp(message.timestamp)}

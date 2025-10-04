@@ -20,12 +20,10 @@ else:
 
 genai.configure(api_key=api_key)
 
-# Model configuration
+# Model configuration - simplified for reliability
 generation_config = {
-    "temperature": 0.8,  # Slightly lower for more focused responses
-    "top_p": 0.95,
-    "max_output_tokens": 800,  # Balanced length for complete but concise responses
-    "top_k": 40,
+    "temperature": 0.7,
+    "max_output_tokens": 500,
 }
 
 # Safety settings - try most permissive first
@@ -69,7 +67,7 @@ safety_settings_moderate = [
 ]
 
 # System instruction for MindCanvas persona
-SYSTEM_INSTRUCTION = """Anda adalah MindCanvas, seniman visual yang membuat deskripsi artistik ringkas namun lengkap. Deskripsikan konsep sebagai lukisan dalam Bahasa Indonesia dengan fokus pada: warna utama, komposisi, pencahayaan, dan suasana. Gunakan 2-3 paragraf dengan format markdown. Buat deskripsi yang puitis tapi tidak terlalu panjang."""
+SYSTEM_INSTRUCTION = """Anda adalah MindCanvas, seniman visual yang membuat deskripsi artistik lengkap. Deskripsikan konsep sebagai lukisan dalam Bahasa Indonesia dengan fokus pada warna, komposisi, pencahayaan, dan suasana. Tulis dalam paragraf yang mengalir natural tanpa menggunakan tabel, simbol khusus, atau formatting markdown. Buat deskripsi yang puitis, lengkap, dan mudah dibaca."""
 
 # Initialize the model
 try:
@@ -82,19 +80,41 @@ try:
 except Exception as e:
     logger.error(f"Failed to initialize model: {e}")
     # Final fallback to most basic model
-    model = genai.GenerativeModel(model_name="gemini-flash-latest")
     logger.info("Initialized basic model as fallback")
+
+
+def get_fallback_response(prompt_text: str) -> str:
+    """Generate fallback response when AI is unavailable"""
+    fallback_descriptions = {
+        "happiness": "Kebahagiaan tergambar sebagai lukisan dengan warna kuning cerah dan oranye hangat yang menyebar di seluruh kanvas. Bentuk-bentuk bulat dan lembut mengalir dengan harmonis, menciptakan komposisi yang dinamis namun menenangkan.",
+        "kebahagiaan": "Kebahagiaan tergambar sebagai lukisan dengan warna kuning cerah dan oranye hangat yang menyebar di seluruh kanvas. Bentuk-bentuk bulat dan lembut mengalir dengan harmonis, menciptakan komposisi yang dinamis namun menenangkan.",
+        "love": "Cinta divisualisasikan dengan gradasi merah muda lembut yang berpadu dengan ungu hangat. Garis-garis yang saling bertemu dan melingkar membentuk pola yang intim dan penuh kehangatan.",
+        "cinta": "Cinta divisualisasikan dengan gradasi merah muda lembut yang berpadu dengan ungu hangat. Garis-garis yang saling bertemu dan melingkar membentuk pola yang intim dan penuh kehangatan.",
+        "peace": "Kedamaian hadir dalam bentuk warna biru langit yang tenang berpadu dengan putih lembut. Komposisi horizontal yang stabil dengan tekstur halus menciptakan kesan ketenangan yang mendalam.",
+        "kedamaian": "Kedamaian hadir dalam bentuk warna biru langit yang tenang berpadu dengan putih lembut. Komposisi horizontal yang stabil dengan tekstur halus menciptakan kesan ketenangan yang mendalam.",
+        "nature": "Alam tergambar dengan hijau segar yang bervariasi dari emerald hingga sage. Bentuk-bentuk organik yang mengalir natural dengan sentuhan coklat tanah dan biru langit menciptakan harmoni yang sempurna.",
+        "alam": "Alam tergambar dengan hijau segar yang bervariasi dari emerald hingga sage. Bentuk-bentuk organik yang mengalir natural dengan sentuhan coklat tanah dan biru langit menciptakan harmoni yang sempurna."
+    }
+    
+    # Try to find a matching fallback
+    concept_lower = prompt_text.lower()
+    for key, description in fallback_descriptions.items():
+        if key in concept_lower or concept_lower in key:
+            return description
+    
+    # Generic fallback
+    return f"Konsep '{prompt_text}' tergambar sebagai lukisan dengan warna-warna yang harmonis dan komposisi yang seimbang. Elemen-elemen visual berpadu menciptakan suasana yang sesuai dengan makna dari konsep tersebut."
 
 
 async def generate_visual_description(prompt_text: str) -> str:
     """
-    Generate a visual description for the given abstract concept using Google AI.
+    Generate a visual description for the given abstract concept.
     
     Args:
         prompt_text (str): The abstract concept or idea to visualize
         
     Returns:
-        str: A detailed, poetic visual description of the concept
+        str: A detailed visual description in Indonesian
         
     Raises:
         Exception: If there's an error communicating with the AI model
@@ -105,86 +125,42 @@ async def generate_visual_description(prompt_text: str) -> str:
         
         logger.info(f"Generating visual description for: {prompt_text[:50]}...")
         
-        # Try multiple prompt variations to avoid safety blocks
-        prompts_to_try = [
-            f"Deskripsikan '{prompt_text.strip()}' sebagai lukisan dalam Bahasa Indonesia. Fokus pada warna, bentuk, dan suasana. Gunakan format: ## untuk judul, **tebal** untuk penekanan. Buat deskripsi yang lengkap tapi ringkas.",
-            f"Gambarkan konsep '{prompt_text.strip()}' sebagai karya seni visual dalam Bahasa Indonesia. Jelaskan komposisi, warna, dan atmosfer dengan format markdown yang rapi.",
-            f"Visual description of '{prompt_text.strip()}' as artwork in Indonesian. Include colors, composition, mood. Use markdown format. Keep it complete but concise."
-        ]
+        # Check if API key is available
+        if not api_key or api_key == "YOUR_API_KEY":
+            logger.warning("No valid API key, using fallback response")
+            return get_fallback_response(prompt_text.strip())
         
-        response = None
-        last_error = None
-        
-        for i, prompt in enumerate(prompts_to_try):
-            try:
-                logger.info(f"Trying prompt variation {i+1}: {prompt[:80]}...")
-                response = model.generate_content(prompt)
-                
-                # Check if we got a valid response
-                if response.candidates and len(response.candidates) > 0:
-                    candidate = response.candidates[0]
-                    if candidate.finish_reason == 1:  # STOP (success)
-                        logger.info(f"Success with prompt variation {i+1}")
-                        break
-                    elif candidate.finish_reason == 3:  # LENGTH (truncated due to max_tokens)
-                        logger.warning(f"Response truncated due to length limit, but using it anyway")
-                        break  # Still use the response even if truncated
-                    elif candidate.finish_reason == 2:  # SAFETY
-                        logger.warning(f"Prompt variation {i+1} blocked by safety filter")
-                        continue
-                    else:
-                        logger.warning(f"Unexpected finish_reason: {candidate.finish_reason}")
-                        continue
-                else:
-                    logger.warning(f"No candidates in response for prompt variation {i+1}")
-                    continue
-                    
-            except Exception as e:
-                logger.warning(f"Prompt variation {i+1} failed: {e}")
-                last_error = e
-                continue
-        
-        if not response:
-            raise Exception("Semua variasi prompt gagal. Coba konsep yang lebih sederhana seperti 'alam', 'seni', atau 'warna'.")
-        
-        # Extract text from successful response
+        # Try simple prompt first
         try:
-            if hasattr(response, 'text') and response.text:
+            simple_prompt = f"Describe {prompt_text.strip()} as visual art"
+            logger.info(f"Trying simple prompt: {simple_prompt}")
+            response = model.generate_content(simple_prompt)
+            
+            if response and response.text:
+                logger.info("Simple prompt succeeded")
                 response_text = response.text.strip()
-            else:
-                # Try to extract from candidates
-                candidate = response.candidates[0]
-                if candidate.content and candidate.content.parts:
-                    text_parts = []
-                    for part in candidate.content.parts:
-                        if hasattr(part, 'text') and part.text:
-                            text_parts.append(part.text)
-                    if text_parts:
-                        response_text = ''.join(text_parts).strip()
-                    else:
-                        raise Exception("Tidak dapat mengekstrak teks dari response")
-                else:
-                    raise Exception("Response tidak mengandung konten teks")
-        except Exception as extract_error:
-            logger.error(f"Error extracting text: {extract_error}")
-            raise Exception("Gagal mengekstrak deskripsi visual. Silakan coba lagi dengan konsep yang berbeda.")
-        
-        # Check if response was truncated and add note if needed
-        if response.candidates and len(response.candidates) > 0:
-            candidate = response.candidates[0]
-            if candidate.finish_reason == 3:  # LENGTH (truncated)
-                response_text += "\n\n---\n*💡 Deskripsi ini dipotong karena terlalu panjang. Coba gunakan konsep yang lebih spesifik untuk hasil yang lebih fokus.*"
-                logger.warning("Response was truncated due to length limit")
-        
-        logger.info("Visual description generated successfully")
-        return response_text
+                
+                # Translate to Indonesian if needed
+                if not any(word in response_text.lower() for word in ['warna', 'lukisan', 'seni']):
+                    try:
+                        translate_prompt = f"Translate to Indonesian and make poetic: {response_text}"
+                        translated = model.generate_content(translate_prompt)
+                        if translated and translated.text:
+                            response_text = translated.text.strip()
+                    except:
+                        pass
+                
+                return response_text
+                
+        except Exception as e:
+            logger.warning(f"AI generation failed: {e}")
+            
+        # If AI fails, use fallback
+        return get_fallback_response(prompt_text.strip())
         
     except ValueError as ve:
         logger.error(f"Validation error: {ve}")
-        raise ve
+        return get_fallback_response(prompt_text.strip())
     except Exception as e:
         logger.error(f"Error generating visual description: {str(e)}")
-        logger.error(f"Error type: {type(e).__name__}")
-        import traceback
-        logger.error(f"Traceback: {traceback.format_exc()}")
-        raise Exception(f"Failed to generate visual description: {str(e)}")
+        return get_fallback_response(prompt_text.strip())

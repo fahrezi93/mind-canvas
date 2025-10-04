@@ -1,12 +1,17 @@
-# MindCanvas - AI Idea Visualizer
+# MindCanvas - AI Visual Idea Translator
 
-MindCanvas is an AI-powered chatbot that transforms abstract concepts into vivid, poetic visual descriptions. Perfect for artists, designers, and writers seeking inspiration.
+**Transform abstract concepts into vivid visual descriptions using AI**
+
+MindCanvas is an innovative AI-powered chatbot that specializes in translating abstract ideas into detailed, poetic visual descriptions. Perfect for artists, designers, writers, and creative minds seeking inspiration.
 
 ## Features
 
-- 🎨 **AI-Powered Visualization**: Transform abstract ideas into detailed visual descriptions
-- 💬 **Interactive Chat Interface**: Real-time conversation with the AI
-- 🌈 **Beautiful UI**: Modern, responsive design with CSS modules
+- 🤖 **AI-Powered**: Uses Google Gemini AI for intelligent visual interpretation
+- 🎨 **Visual Storytelling**: Transforms concepts like "serenity" or "innovation" into rich visual narratives
+- 🇮🇩 **Bahasa Indonesia**: Responds in beautiful, poetic Indonesian language
+- 📱 **Modern UI**: Clean, responsive chat interface inspired by modern messaging apps
+- 🎯 **Markdown Support**: Properly formatted responses with headers, bold, and italic text
+- ⚡ **Real-time**: Instant AI responses with typing indicators
 - ⚡ **Fast Performance**: Built with React + TypeScript and FastAPI
 - 🔒 **Secure**: Environment-based API key management
 

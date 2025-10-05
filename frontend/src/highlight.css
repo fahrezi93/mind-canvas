@@ -1,0 +1,89 @@
+/* Highlight.js theme for better code highlighting */
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+  color: #fbbf24;
+  font-weight: bold;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+  color: #fb7185;
+}
+
+.hljs-string,
+.hljs-doctag {
+  color: #34d399;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+  color: #60a5fa;
+  font-weight: bold;
+}
+
+.hljs-type,
+.hljs-class .hljs-title {
+  color: #a78bfa;
+  font-weight: bold;
+}
+
+.hljs-tag,
+.hljs-name,
+.hljs-attribute {
+  color: #f59e0b;
+  font-weight: normal;
+}
+
+.hljs-regexp,
+.hljs-link {
+  color: #10b981;
+}
+
+.hljs-symbol,
+.hljs-bullet {
+  color: #ef4444;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #8b5cf6;
+}
+
+.hljs-meta {
+  color: #6b7280;
+}
+
+.hljs-deletion {
+  background: #7f1d1d;
+}
+
+.hljs-addition {
+  background: #14532d;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}

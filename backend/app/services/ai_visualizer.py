@@ -26,10 +26,10 @@ else:
 
 # --- Improved Model Configuration ---
 generation_config = {
-    "temperature": 0.8,  # Sedikit lebih tinggi untuk respons yang lebih kreatif
-    "top_p": 0.95,
-    "top_k": 40,
-    "max_output_tokens": 1024,  # Tingkatkan untuk jawaban yang lebih panjang dan detail
+    "temperature": 0.85,  # Optimal untuk kreativitas dan konsistensi
+    "top_p": 0.9,        # Lebih fokus untuk kualitas output
+    "top_k": 50,         # Lebih banyak pilihan kata
+    "max_output_tokens": 2048,  # Tingkatkan signifikan untuk respons yang sangat detail
 }
 
 # safety settings - try most permissive first
@@ -74,16 +74,47 @@ safety_settings_moderate = [
 
 # --- Persona & Instruksi Sistem yang Lebih Kuat ---
 SYSTEM_INSTRUCTION = """
-Anda adalah seniman visual ahli yang mendeskripsikan lukisan dalam Bahasa Indonesia.
+Anda adalah seorang kritikus seni dan visualizer ahli yang mampu mendeskripsikan konsep abstrak menjadi lukisan visual yang mendalam dan detail dalam Bahasa Indonesia.
 
-Tugas: Deskripsikan konsep yang diberikan sebagai lukisan visual yang detail dan puitis.
+**TUGAS UTAMA:**
+Transformasikan konsep yang diberikan menjadi deskripsi lukisan visual yang sangat detail, menggunakan format markdown untuk presentasi yang menarik.
 
-Format wajib:
-- Paragraf 1: Suasana dan atmosfer keseluruhan
-- Paragraf 2: Detail warna, komposisi, dan pencahayaan  
-- Paragraf 3: Makna dan emosi yang disampaikan
+**FORMAT RESPONS WAJIB (gunakan markdown):**
 
-Gunakan bahasa Indonesia yang indah, pisahkan paragraf dengan baris kosong, dan fokus pada konsep yang diminta.
+## 🎨 **Komposisi Visual**
+*Deskripsikan suasana keseluruhan, layout, dan atmosfer lukisan*
+
+## 🌈 **Palet Warna & Pencahayaan**
+*Detail tentang:*
+- **Warna dominan:** [warna utama dan maknanya]
+- **Aksen warna:** [warna pendukung]
+- **Pencahayaan:** [sumber cahaya dan efeknya]
+- **Gradasi:** [transisi warna]
+
+## 🖌️ **Teknik & Tekstur**
+*Jelaskan:*
+- Gaya lukisan (realis, abstrak, impresionisme, dll)
+- Tekstur kanvas dan aplikasi cat
+- Goresan kuas dan detail teknis
+
+## 💭 **Simbolisme & Makna**
+*Analisis mendalam tentang:*
+- Elemen simbolis dalam lukisan
+- Pesan emosional yang disampaikan  
+- Interpretasi filosofis dari konsep
+
+## ✨ **Interpretasi Ahli**
+*Kesimpulan sebagai kritikus seni tentang karya ini*
+
+**GAYA PENULISAN:**
+- Gunakan bahasa Indonesia yang puitis dan profesional
+- Sertakan detail teknis seperti seorang ahli seni
+- Berikan analisis mendalam seperti kritikus seni
+- Gunakan markdown formatting untuk struktur yang menarik
+- WAJIB lengkapi semua 5 section dengan detail penuh
+- Target 400-600 kata untuk analisis yang komprehensif
+- JANGAN pernah memotong respons di tengah kalimat
+- PASTIKAN setiap section memiliki konten yang substantif
 """
 
 # Initialize the model
@@ -113,9 +144,41 @@ if api_key and api_key != "YOUR_API_KEY":
 def get_fallback_response(prompt_text: str) -> str:
     """Generate a more creative fallback response when AI is unavailable."""
     templates = [
-        f"Di atas kanvas imajinasi, konsep '{prompt_text}' terlukis dalam simfoni warna yang mendalam. Sebuah palet yang dipilih dengan cermat—dari nada yang paling lembut hingga yang paling berani—berpadu untuk menciptakan suasana yang menggugah jiwa, merefleksikan esensi dari ide itu sendiri.",
-        f"Visualisasi dari '{prompt_text}' adalah sebuah tarian antara cahaya dan bayangan. Komposisi yang dinamis membawa mata kita menyusuri setiap detail, di mana bentuk-bentuk simbolis muncul dari kedalaman, menceritakan sebuah kisah tanpa kata tentang makna '{prompt_text}'.",
-        f"Jika '{prompt_text}' adalah sebuah lukisan, maka ia akan memiliki tekstur yang kaya dan berlapis. Goresan kuas yang ekspresif menangkap energi dari konsep ini, sementara gradasi warna yang halus mengungkapkan kompleksitas emosi yang tersembunyi di baliknya, menciptakan sebuah karya yang tidak hanya dilihat, tetapi juga dirasakan."
+        f"""## 🎨 **Komposisi Visual**
+Di atas kanvas imajinasi, konsep **"{prompt_text}"** terlukis dalam simfoni warna yang mendalam. Komposisinya mengalir seperti puisi visual, menciptakan harmoni antara bentuk dan makna.
+
+## 🌈 **Palet Warna & Pencahayaan**
+- **Warna dominan:** Gradasi hangat yang menenangkan jiwa
+- **Aksen warna:** Sentuhan kontras yang membangkitkan emosi
+- **Pencahayaan:** Cahaya lembut yang menyinari setiap detail
+- **Gradasi:** Transisi halus dari gelap menuju terang
+
+## 🖌️ **Teknik & Tekstur**
+Goresan kuas yang ekspresif menangkap energi dari konsep ini, dengan tekstur yang kaya dan berlapis, menciptakan dimensi visual yang mendalam.
+
+## 💭 **Simbolisme & Makna**
+Setiap elemen dalam lukisan ini merefleksikan esensi dari **"{prompt_text}"**, menceritakan kisah universal tentang pengalaman manusia.
+
+## ✨ **Interpretasi Ahli**
+Karya ini berhasil menvisualisasikan abstraksi menjadi bentuk yang dapat dirasakan, menciptakan jembatan antara konsep dan emosi.""",
+
+        f"""## 🎨 **Komposisi Visual**
+Visualisasi dari **"{prompt_text}"** hadir sebagai tarian antara cahaya dan bayangan. Komposisi dinamis membawa mata menyusuri setiap detail bermakna.
+
+## 🌈 **Palet Warna & Pencahayaan**
+- **Warna dominan:** Nuansa yang mencerminkan kedalaman konsep
+- **Aksen warna:** Detail yang memperkuat narasi visual
+- **Pencahayaan:** Drama cahaya yang menghidupkan kanvas
+- **Gradasi:** Spektrum emosi dalam setiap transisi
+
+## 🖌️ **Teknik & Tekstur**
+Teknik lukisan yang menggabungkan realisme dengan sentuhan abstrak, menciptakan tekstur yang dapat dirasakan melalui pandangan.
+
+## 💭 **Simbolisme & Makna**
+Bentuk-bentuk simbolis muncul dari kedalaman, menceritakan kisah tanpa kata tentang makna **"{prompt_text}"**.
+
+## ✨ **Interpretasi Ahli**
+Sebuah masterpiece yang mendemonstrasikan kekuatan seni visual dalam mengkomunikasikan ide abstrak."""
     ]
     return random.choice(templates)
 
@@ -149,13 +212,17 @@ async def generate_visual_description(prompt_text: str) -> str:
             response_text = response.text.strip()
             logger.info(f"AI response length: {len(response_text)} characters")
             
-            # Validasi untuk memastikan respons berkualitas
-            if len(response_text) > 100 and clean_prompt.lower() in response_text.lower():
-                logger.info("Successfully generated AI response with relevant content.")
-                return response_text
-            elif len(response_text) > 100:
-                logger.info("AI generated good response, using it.")
-                return response_text
+            # Validasi yang lebih permisif untuk respons panjang
+            if len(response_text) > 50:  # Lowered threshold
+                logger.info("Successfully generated AI response.")
+                
+                # Check if response seems complete (should end with proper sentence)
+                if response_text.endswith(('.', '!', '?', '**', '*')):
+                    logger.info("Response appears complete.")
+                    return response_text
+                else:
+                    logger.warning("Response might be truncated, but using it anyway.")
+                    return response_text
             else:
                 logger.warning(f"AI response too short: {response_text[:100]}...")
                 return get_fallback_response(clean_prompt)

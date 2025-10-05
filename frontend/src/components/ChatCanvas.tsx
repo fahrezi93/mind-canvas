@@ -1,4 +1,7 @@
 import React, { useState, FormEvent, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 import styles from './ChatCanvas.module.css';
 
 interface ChatMessage {
@@ -170,7 +173,18 @@ const ChatCanvas: React.FC = () => {
                     </div>
                     <div className={styles.messageBody}>
                       <div className={styles.messageText}>
-                        {message.content}
+                        {message.type === 'ai' ? (
+                          <div className={styles.markdownContent}>
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              rehypePlugins={[rehypeHighlight]}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
+                          </div>
+                        ) : (
+                          message.content
+                        )}
                       </div>
                       <div className={styles.messageTime}>
                         {formatTimestamp(message.timestamp)}
